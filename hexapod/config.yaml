@@ -37,8 +37,8 @@ boards:
 
           - name           : 'right_center_rotate'
             channel        : 4
-            servo_min      : 450
-            servo_max      : 750
+            servo_min      : 500
+            servo_max      : 700
             forward        : 0
             back           : 100
             up             : None
@@ -140,7 +140,7 @@ boards:
           - name           : 'left_center_rotate'
             channel        : 3
             servo_min      : 450
-            servo_max      : 750
+            servo_max      : 650
             forward        : 0
             back           : 100
             up             : None

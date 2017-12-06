@@ -7,94 +7,121 @@
 import numpy as np
 import cv2
 
+## HSV constants for robot and spotlight
+H_robot=179
+S_robot=255
+V_robot=42
+H_spotlight=179
+S_spotlight=255
+V_spotlight=243
+H_low=0
+S_low=0
+V_low=0
+
+
 ## Create a video capture object
-cap = cv2.VideoCapture(0) # Send 0 since we have only one camera. Send 1 to use second camera
+cap = cv2.VideoCapture(1) # Send 0 since we have only one camera. Send 1 to use second camera
 
 ## Check whether capture object is opened or not
 if(cap.isOpened() == False):
-	## If object is not initialized then open it
-	cap.open()
-
-############################ TODO ######################################
-## TODO: Remove the trackbars once HSV for the hexapod is configured
-# Function to be called when trackbars change
-def nothing(x):
-	pass # IT simply does nothing
+    ## If object is not initialized then open it
+    cap.open()
 
 # Create a window
 cv2.namedWindow('image')
-# Create trackbars to select boundary values
-cv2.createTrackbar('High H','image',0,179,nothing)
-cv2.createTrackbar('High S','image',0,255,nothing)
-cv2.createTrackbar('High V','image',0,255,nothing)
-cv2.createTrackbar('Low H','image',0,179,nothing)
-cv2.createTrackbar('Low S','image',0,255,nothing)
-cv2.createTrackbar('Low V','image',0,255,nothing)
-
-############################ TODO ######################################
 
 ## Start capturing frame by frame in an infinite loop
 while(True): 
 
-	# Start capturing the frames
-	ret, frame = cap.read() # Get the returned value(T/F) and the frame.
+    # Start capturing the frames
+    ret, frame = cap.read() # Get the returned value(T/F) and the frame.
 
-	if(ret != True): # Check if reading was successful or not
-		print("Cannot read from the frame\n")
+    if(ret != True): # Check if reading was successful or not
+        print("Cannot read from the frame\n")
 
-	############################ TODO ######################################
+    # Create numpy arrays of these boundaries
+    # TODO: hardcode the values below from what is found through experiment
+    higher_boundary_robot = np.array([H_robot,S_robot,V_robot])
+    higher_boundary_spotlight = np.array([H_spotlight,S_spotlight,V_spotlight])
+    lower_boundary = np.array([H_low,S_low,V_low])
 
-	# Get the current position of the trackbars
-	high_h = cv2.getTrackbarPos('High H','image')
-	high_s = cv2.getTrackbarPos('High S','image')
-	high_v = cv2.getTrackbarPos('High V','image')
-	low_h = cv2.getTrackbarPos('Low H','image')
-	low_s = cv2.getTrackbarPos('Low H','image')
-	low_v = cv2.getTrackbarPos('Low H','image')
+    ############################ TODO ######################################
 
-	# Create numpy arrays of these boundaries
-	# TODO: hardcode the values below from what is found through experiment
-	higher_boundary = np.array([high_h,high_s,high_v])
-	lower_boundary = np.array([low_h,low_s,low_v])
+    # Convert the captured frame from BGR to HSV format
+    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV) 
 
-	############################ TODO ######################################
+    # Threshold the HSV image to get only our object
+    threshold_robot = cv2.inRange(hsv,lower_boundary,higher_boundary_robot)
+    threshold_spotlight = cv2.inRange(hsv,lower_boundary,higher_boundary_spotlight)
 
-	# Convert the captured frame from BGR to HSV format
-	hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV) 
+    # Get the targeted image by doing bitwise and
+    target_robot = cv2.bitwise_and(frame,frame,mask=threshold_robot)
+    target_spotlight = cv2.bitwise_and(frame,frame,mask=threshold_spotlight)
 
-	# Threshold the HSV image to get only our object
-	threshold = cv2.inRange(hsv,lower_boundary,higher_boundary)
+    ## Perform morphological transformations #####
+    ## Morphological opening
+    # We first remove the white noise from the boundaries of the detected object - Erode operation
+    # We create an elliptical kernel for the erosion
+    target_robot = cv2.erode(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_spotlight = cv2.erode(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
-	# Get the targeted image by doing bitwise and
-	target = cv2.bitwise_and(frame,frame,mask=threshold)
+    # Perform the dilation to get the more enchanced image of the object
+    target_robot = cv2.dilate(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_spotlight = cv2.dilate(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
-	## Perform morphological transformations #####
-	## Morphological opening
-	# We first remove the white noise from the boundaries of the detected object - Erode operation
-	# We create an elliptical kernel for the erosion
-	target = cv2.erode(target,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    ## Morphological Closing - This is done to fill holes insie the detected object. 
+    ## This is done by first dilation then eroding the image
 
-	# Perform the dilation to get the more enchanced image of the object
-	target = cv2.dilate(target,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_robot = cv2.dilate(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_robot = cv2.erode(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_spotlight = cv2.dilate(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    target_spotlight = cv2.erode(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
-	## Morphological Closing - This is done to fill holes insie the detected object. 
-	## This is done by first dilation then eroding the image
+    
 
-	target = cv2.dilate(target,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-	target = cv2.erode(target,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    ######################## Object Tracking #########################################################
+    # We use the moments method to track the object
 
-	## Display the images
-	cv2.imshow("Result",target)
-	cv2.imshow("Mask",threshold)
-	cv2.imshow("Original Image",frame)
-	k = cv2.waitKey(5) & 0xFF
-	if k == 27:
-		break
+    # Convert the images to black and white
+
+    # Get the moments of the two images
+    moments_robot = cv2.moments(threshold_robot)
+    moments_spotlight = cv2.moments(threshold_spotlight)
+
+    # Calculate the area of the robot object
+    area_robot=moments_robot["m00"]
+    area_spotlight=moments_spotlight["m00"]
+
+    # To remove the effect of noise, consider tracking above only a threshold of area
+    if(area_robot > 10000):
+        # Calculate the x and y coordinates of center
+        X_r = moments_robot["m10"] / area_robot;
+        Y_r = moments_robot["m01"] / area_robot
+
+    if(area_spotlight>8000):
+        # Calculate the centre for spotlight
+        X_s=moments_spotlight["m10"] / area_spotlight
+        Y_s=moments_spotlight["m01"] / area_spotlight
+
+    print("X for S is"+str(X_s))
+    print("Y for S is"+str(Y_s))
+    print("X for R is"+str(X_r))
+    print("Y for R is"+str(Y_r))
+
+    ## Display the images
+    cv2.imshow("Result_robot",target_robot)
+    cv2.imshow("Mask_robot",threshold_robot)
+    cv2.imshow("Result_spotlight",target_spotlight)
+    cv2.imshow("Mask_spotlight",threshold_spotlight)
+    cv2.imshow("Original Image",frame)
+    k = cv2.waitKey(5) & 0xFF
+    if k == 27:
+        break
+
+
 
 
 
 # Release the capture
 cap.release()
 cv2.destroyAllWindows()
-
-

@@ -204,67 +204,6 @@ class Hexapod:
         self.servos['right_back_rotate'].move_back()
         time.sleep(0.01)
         
-    def raise_all_lowers(self):
-        # - Raise all lowers
-        
-        self.servos['left_front_lower'].move_up()
-        time.sleep(0.1)
-        self.servos['right_front_lower'].move_up()
-        time.sleep(0.1)
-
-        self.servos['left_center_lower'].move_up()
-        time.sleep(0.1)
-        self.servos['right_center_lower'].move_up()
-        time.sleep(0.1)
-
-        self.servos['left_back_lower'].move_up()
-        time.sleep(0.1)
-        self.servos['right_back_lower'].move_up()
-        time.sleep(0.1)
-        
-    def raise_all_uppers(self):
-        self.move_all_uppers(0)
-        
-    def center_all_lowers(self):        
-        # - Center all lowers
-        self.servos['left_front_lower'].move_center()
-        time.sleep(0.1)
-        self.servos['right_front_lower'].move_center()
-        time.sleep(0.1)
-
-        self.servos['left_center_lower'].move_center()
-        time.sleep(0.1)
-        self.servos['right_center_lower'].move_center()
-        time.sleep(0.1)
-
-        self.servos['left_back_lower'].move_center()
-        time.sleep(0.1)
-        self.servos['right_back_lower'].move_center()
-        time.sleep(0.1)
-        
-    def center_all_uppers(self):
-        self.move_all_uppers(50)
-        
-    def lower_all_lowers(self):
-        # - Lower all lowers
-        self.servos['left_front_lower'].move_down()
-        time.sleep(0.1)
-        self.servos['right_front_lower'].move_down()
-        time.sleep(0.1)
-
-        self.servos['left_center_lower'].move_down()
-        time.sleep(0.1)
-        self.servos['right_center_lower'].move_down()
-        time.sleep(0.1)
-
-        self.servos['left_back_lower'].move_down()
-        time.sleep(0.1)
-        self.servos['right_back_lower'].move_down()
-        time.sleep(0.1)
-        
-    def lower_all_uppers(self):
-        self.move_all_uppers(100)
-        
     def move_all_lowers(self, position):
         # - Move all lowers
         self.servos['left_front_lower'].set_position(position)
@@ -282,6 +221,15 @@ class Hexapod:
         self.servos['right_back_lower'].set_position(position)
         time.sleep(0.01)
         
+    def raise_all_lowers(self):
+        self.move_all_lowers(0)
+        
+    def center_all_lowers(self):
+        self.move_all_lowers(50)
+        
+    def lower_all_lowers(self):
+        self.move_all_lowers(100)
+       
     def move_right_lowers(self, position):
         # - Move all lowers
         self.servos['right_front_lower'].set_position(position)
@@ -324,7 +272,18 @@ class Hexapod:
         time.sleep(0.01)
 
         self.servos['left_back_lower'].set_position(position)
-        time.sleep(0.01)
+        time.sleep(0.01)        
+        
+    def raise_all_uppers(self):
+        self.move_all_uppers(0)
+    
+    def center_all_uppers(self):
+        self.move_all_uppers(50)
+        
+    def lower_all_uppers(self):
+        self.move_all_uppers(100)
+
+
         
     def move_all_uppers(self, position):
         # - Move all uppers
@@ -386,3 +345,7 @@ class Hexapod:
 
         self.servos['right_back_upper'].set_position(position)
         time.sleep(0.01)
+        
+    def raise_all_legs(self):
+        self.raise_all_uppers()
+        self.raise_all_lowers()
