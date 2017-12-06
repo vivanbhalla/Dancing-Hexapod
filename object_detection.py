@@ -103,6 +103,11 @@ while(True):
         X_s=moments_spotlight["m10"] / area_spotlight
         Y_s=moments_spotlight["m01"] / area_spotlight
 
+    print("X for S is"+X_s)
+    print("Y for S is"+Y_s)
+    print("X for R is"+X_r)
+    print("Y for R is"+Y_r)
+
     ## Display the images
     cv2.imshow("Result_robot",target_robot)
     cv2.imshow("Mask_robot",threshold_robot)
