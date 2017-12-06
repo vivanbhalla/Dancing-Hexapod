@@ -30,6 +30,8 @@ class Servo:
         self.down = down
         self.center = center
         self.invert = invert
+        
+        self.current_state = None
     
     def set_max(self, max_value):
         self.servo_max = max_value
@@ -53,11 +55,14 @@ class Servo:
         return int(pulse)
     
     def set_position(self, percent):
-        self.board.set_pwm(self.channel, 0, self.servo_percent_to_pulse(percent))
+        pulse = self.servo_percent_to_pulse(percent)
+        self.board.set_pwm(self.channel, 0, pulse)
+        self.current_state = pulse
         
     # Low level function to tune min/max values
     def set_pulse(self, pulse):
         self.board.set_pwm(self.channel, 0, pulse)
+        self.current_state = pulse
         
     def set_center(self, percent):
         self.center = percent
@@ -167,8 +172,130 @@ class Hexapod:
                     
         else:
             print('ERROR: No boards found for the hexapod.')
-            
-    def center_all_legs(self):
+
+    def resting_state(self):
+        self.move_all_uppers(100)
+        time.sleep(0.02)
+        self.move_all_lowers(0)
+        
+    def short_from_square_state(self):
+        self.move_all_uppers(75)
+        time.sleep(0.02)
+        self.move_all_lowers(25)
+
+    def short_from_resting_state(self):
+        self.move_all_lowers(25)
+        time.sleep(0.02)
+        self.move_all_uppers(75)
+        
+    def square_from_tall_state(self):
+        self.move_all_uppers(50)
+        time.sleep(0.02)
+        self.move_all_lowers(50)
+        
+    def square_from_short_state(self):
+        self.move_all_lowers(50)
+        time.sleep(0.02)
+        self.move_all_uppers(50)
+        
+    def tall_state(self):
+        self.move_all_lowers(75)
+        time.sleep(0.02)
+        self.move_all_uppers(25)
+        
+    def stand(self):
+        self.short_from_resting_state()
+    
+    def sit(self):
+        self.resting_state()
+
+    def rotate(self, right=True):
+        sleep_time = 0.5
+        # Raise the center legs
+        self.move_center_lowers(15)
+
+        time.sleep(sleep_time)
+
+        # position center legs for rotation
+        if right:
+            self.servos['left_center_rotate'].move_forward()
+            self.servos['right_center_rotate'].move_back()
+        else:
+            self.servos['left_center_rotate'].move_back()
+            self.servos['right_center_rotate'].move_forward()
+
+        time.sleep(sleep_time)
+
+        # Drop center legs to control rotation
+        self.move_center_lowers(30)
+
+        time.sleep(sleep_time)
+
+        # position center legs for rotation
+        if right:
+            self.servos['left_center_rotate'].move_back()
+            self.servos['right_center_rotate'].move_forward()
+        else:
+            self.servos['left_center_rotate'].move_forward()
+            self.servos['right_center_rotate'].move_back()
+
+        time.sleep(sleep_time)
+
+        # raise the middle legs to re-center
+        self.move_center_lowers(15)
+
+        time.sleep(sleep_time)
+
+        # center the middle legs
+        self.move_center_rotators(50)
+
+        time.sleep(sleep_time)
+
+        # reset the center legs to prep for next movement
+        self.move_center_lowers(25)        
+        
+    def row(self, forward=True):
+        # forward = True
+        sleep_time = 0.5
+
+        # Raise the center legs
+        self.move_center_lowers(15)
+
+        time.sleep(sleep_time)
+
+        # center the middle legs
+        if forward:
+            self.move_center_rotators(0)
+        else:
+            self.move_center_rotators(100)
+
+        time.sleep(sleep_time)
+
+        # plant legs for movement movement
+        self.move_center_lowers(30)
+
+        time.sleep(sleep_time)    
+
+        # row the center legs
+        if forward:
+            self.move_center_rotators(100)
+        else:
+            self.move_center_rotators(0)
+
+        time.sleep(sleep_time)
+
+        # raise legs
+        self.move_center_lowers(15)
+        time.sleep(sleep_time)
+
+        # center legs
+        self.move_center_rotators(50)
+        time.sleep(sleep_time)
+
+        # reset legs
+        self.move_center_lowers(25)
+        
+    def align_all_legs(self):
         # - Center all rotation
         
         self.servos['left_front_rotate'].move_center()
@@ -185,10 +312,13 @@ class Hexapod:
         time.sleep(0.01)
         self.servos['right_back_rotate'].move_center()
         time.sleep(0.01)
+
+    def center_all_legs(self):
+        self.move_back_rotators(50)
+        self.move_center_rotators(50)
+        self.move_front_rotators(50)
         
     def spread_all_legs(self):
-        # - Center all rotation
-        
         self.servos['left_front_rotate'].move_forward()
         time.sleep(0.01)
         self.servos['right_front_rotate'].move_forward()
@@ -202,6 +332,24 @@ class Hexapod:
         self.servos['left_back_rotate'].move_back()
         time.sleep(0.01)
         self.servos['right_back_rotate'].move_back()
+        time.sleep(0.01)
+
+    def move_front_rotators(self, position):
+        self.servos['left_front_rotate'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_front_rotate'].set_position(position)
+        time.sleep(0.01)
+
+    def move_center_rotators(self, position):
+        self.servos['left_center_rotate'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_center_rotate'].set_position(position)
+        time.sleep(0.01)
+
+    def move_back_rotators(self, position):
+        self.servos['left_back_rotate'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_back_rotate'].set_position(position)
         time.sleep(0.01)
         
     def move_all_lowers(self, position):
@@ -230,8 +378,25 @@ class Hexapod:
     def lower_all_lowers(self):
         self.move_all_lowers(100)
        
+    def move_front_lowers(self, position):
+        self.servos['left_front_lower'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_front_lower'].set_position(position)
+        time.sleep(0.01)
+        
+    def move_center_lowers(self, position):
+        self.servos['left_center_lower'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_center_lower'].set_position(position)
+        time.sleep(0.01)
+        
+    def move_back_lowers(self, position):
+        self.servos['left_back_lower'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_back_lower'].set_position(position)
+        time.sleep(0.01)
+        
     def move_right_lowers(self, position):
-        # - Move all lowers
         self.servos['right_front_lower'].set_position(position)
         time.sleep(0.01)
 
@@ -242,7 +407,6 @@ class Hexapod:
         time.sleep(0.01)
         
     def move_left_lowers(self, position):
-        # - Move all lowers
         self.servos['left_front_lower'].set_position(position)
         time.sleep(0.01)
 
@@ -283,8 +447,6 @@ class Hexapod:
     def lower_all_uppers(self):
         self.move_all_uppers(100)
 
-
-        
     def move_all_uppers(self, position):
         # - Move all uppers
         self.servos['left_front_upper'].set_position(position)
@@ -301,6 +463,25 @@ class Hexapod:
         time.sleep(0.01)
         self.servos['right_back_upper'].set_position(position)
         time.sleep(0.01)
+        
+    def move_front_uppers(self, position):
+        # - Move all uppers
+        self.servos['left_front_upper'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_front_upper'].set_position(position)
+        time.sleep(0.01)
+        
+    def move_center_uppers(self, position):
+        self.servos['left_center_upper'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_center_upper'].set_position(position)
+        time.sleep(0.01)
+        
+    def move_back_uppers(self, position):
+        self.servos['left_back_upper'].set_position(position)
+        time.sleep(0.01)
+        self.servos['right_back_upper'].set_position(position)
+        time.sleep(0.01)    
         
     def move_right_uppers(self, position):
         # - Move all lowers
