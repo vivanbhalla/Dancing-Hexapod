@@ -20,7 +20,7 @@ V_low=0
 
 
 ## Create a video capture object
-cap = cv2.VideoCapture(0) # Send 0 since we have only one camera. Send 1 to use second camera
+cap = cv2.VideoCapture(1) # Send 0 since we have only one camera. Send 1 to use second camera
 
 ## Check whether capture object is opened or not
 if(cap.isOpened() == False):
@@ -103,10 +103,10 @@ while(True):
         X_s=moments_spotlight["m10"] / area_spotlight
         Y_s=moments_spotlight["m01"] / area_spotlight
 
-    print("X for S is"+X_s)
-    print("Y for S is"+Y_s)
-    print("X for R is"+X_r)
-    print("Y for R is"+Y_r)
+    print("X for S is"+str(X_s))
+    print("Y for S is"+str(Y_s))
+    print("X for R is"+str(X_r))
+    print("Y for R is"+str(Y_r))
 
     ## Display the images
     cv2.imshow("Result_robot",target_robot)
