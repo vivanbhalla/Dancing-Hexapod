@@ -1,0 +1,31 @@
+如果你电脑上无法打开说明书，请用文件夹里面的‘PDF 阅读器’ 去打开说明书！！！！！！！！！！！！！
+
+
+首先根据 "1.快速入门.pdf" 里面的内容快速的测试舵机控制板的，这样可以更快的了解舵机控制板。
+
+然后可以看一下 "2.使用说明.pdf"  教详细的了解一下舵机控制板。
+
+有问题 可以先看一下:
+http://www.torobot.com/doc/usc-faq
+
+如果还有相关问题，可以仔细店铺的客服 http://torobot.taobao.com  
+
+
+文件说明：
+
+usc_driver.exe 是电脑驱动。支持xp win7 win8
+
+rios_usc.exe  电脑控制板软件
+
+SerialAssistant.exe  串口调试助手。一般用不到
+
+usc.apk   蓝牙模块的安卓端软件
+
+Arduino程序.ino   是用另外一个Arduino控制舵机控制板的 例程。
+
+
+
+注意：
+
+如果初次运行rios_usc.exe,会提出一些错误，进入软件之后，点击 “设置”，然后点击“卸载”，然后再次打开rios_usc.exe 即可。
+
