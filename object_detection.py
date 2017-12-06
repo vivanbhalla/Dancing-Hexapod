@@ -82,9 +82,11 @@ while(True):
     ######################## Object Tracking #########################################################
     # We use the moments method to track the object
 
+    # Convert the images to black and white
+
     # Get the moments of the two images
-    moments_robot = cv2.moments(target_robot)
-    moments_spotlight = cv2.moments(target_spotlight)
+    moments_robot = cv2.moments(threshold_robot)
+    moments_spotlight = cv2.moments(threshold_spotlight)
 
     # Calculate the area of the robot object
     area_robot=moments_robot["m00"]
@@ -118,5 +120,3 @@ while(True):
 # Release the capture
 cap.release()
 cv2.destroyAllWindows()
-
-
