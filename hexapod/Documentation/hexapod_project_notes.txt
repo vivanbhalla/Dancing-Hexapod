@@ -1,0 +1,14 @@
+hexapod robot project notes
+
+11/18/2017:
+	Working on designing leg object/movement
+	
+	ipython notes:
+		%reset # resets all of the variables in the current namespace
+		
+		%load_ext autoreload
+		%autoreload 2 #reimports all functions when called
+
+		# Instantiate a Leg object
+		from leg_object import Leg	# imports the Leg class
+		my_leg = Leg(servo_min=100, servo_max=600, rotate_channel=0, lower_channel=1, upper_channel=2)
