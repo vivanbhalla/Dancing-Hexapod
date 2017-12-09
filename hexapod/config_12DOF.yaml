@@ -1,0 +1,135 @@
+boards:
+    - board_address        : 0x40
+      pwm_freq             : 60
+      servos:
+          - name           : 'left_back_rotate'
+            channel        : 0
+            servo_min      : 550
+            servo_max      : 675
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : False
+
+          - name           : 'left_back_raise'
+            channel        : 1
+            servo_min      : 225
+            servo_max      : 625
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : True
+
+          - name           : 'right_back_rotate'
+            channel        : 2
+            servo_min      : 150
+            servo_max      : 275
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : True
+
+          - name           : 'right_back_raise'
+            channel        : 3
+            servo_min      : 150
+            servo_max      : 600
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : False
+
+          - name           : 'left_center_rotate'
+            channel        : 4
+            servo_min      : 550
+            servo_max      : 675
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : False
+
+          - name           : 'left_center_raise'
+            channel        : 5
+            servo_min      : 275
+            servo_max      : 675
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : True
+
+          - name           : 'right_center_rotate'
+            channel        : 6
+            servo_min      : 200
+            servo_max      : 300
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : True
+
+          - name           : 'right_center_raise'
+            channel        : 7
+            servo_min      : 150
+            servo_max      : 600
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : False
+
+          - name           : 'left_front_rotate'
+            channel        : 8
+            servo_min      : 550
+            servo_max      : 675
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : False
+
+          - name           : 'left_front_raise'
+            channel        : 9
+            servo_min      : 225
+            servo_max      : 625
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : True
+
+          - name           : 'right_front_rotate'
+            channel        : 10
+            servo_min      : 200
+            servo_max      : 300
+            forward        : 0
+            back           : 100
+            up             : null
+            down           : null
+            center         : 100
+            invert         : True
+
+          - name           : 'right_front_raise'
+            channel        : 11
+            servo_min      : 150
+            servo_max      : 600
+            forward        : null
+            back           : null
+            up             : 0
+            down           : 100
+            center         : 50
+            invert         : False
