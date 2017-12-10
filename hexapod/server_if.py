@@ -28,16 +28,22 @@ def get_args():
     return parser.parse_args()
 
 def initialize_hexapod(config_file):
+    my_hexapod = None
+    
     # open config file
     with open(config_file) as f:
         my_config = yaml.load(f)
 
-    my_hexapod = Hexapod_12DOF(my_config)
-    my_hexapod.move_all_legs(raise_value=0, rotate_value=100)
-    time.sleep(1)
-    my_hexapod.move_all_legs(raise_value=100, rotate_value=100)
-    time.sleep(1)
-    my_hexapod.move_all_legs(raise_value=0, rotate_value=100)
+    if config_file == 'config_12DOF.yaml':
+        my_hexapod = Hexapod_12DOF(my_config)
+        my_hexapod.initial_tests()
+        
+    elif config_file = 'config_18DOF.yaml':
+        my_hexapod = Hexapod_18DOF(my_config)
+        my_hexapod.initial_tests()
+        
+    else:
+        print('ERROR: Cannot recognize the config file!!!')
 
     return my_hexapod
 
@@ -106,63 +112,23 @@ def command_processor(data, my_hexapod):
         return ('Walking Backward {} times'.format(iteration))
 
     elif command == 'front_dancing_1':
-        print('getting ready to dance...')
-        my_hexapod.reposition_center_legs(0)
-        my_hexapod.move_center_legs(raise_value=100)
-
-        print('ready to dance...')
-        for i in range(iteration):
-            print('front dancing...')
-            my_hexapod.front_leg_dancing(step=1)
-
-        print('cleaning up from dancing...')
-        my_hexapod.reposition_center_legs(100)
-
+        print('front dancing...')
+        my_hexapod.front_leg_dancing(step=1, iteration=iteration)
         return ('Dancing Front Legs {} times'.format(iteration))
 
     elif command == 'front_dancing_2':
-        print('getting ready to dance...')
-        my_hexapod.reposition_center_legs(0)
-        my_hexapod.move_center_legs(raise_value=100)
-
-        print('ready to dance...')
-        for i in range(iteration):
-            print('front dancing...')
-            my_hexapod.front_leg_dancing(step=2)
-
-        print('cleaning up from dancing...')
-        my_hexapod.reposition_center_legs(100)
-
+        print('front dancing...')
+        my_hexapod.front_leg_dancing(step=2, iteration=iteration)
         return ('Dancing Front Legs {} times'.format(iteration))
 
     elif command == 'back_dancing_1':
-        print('getting ready to dance...')
-        my_hexapod.reposition_center_legs(100)
-        my_hexapod.move_center_legs(raise_value=100)
-
-        print('ready to dance...')
-        for i in range(iteration):
-            print('front dancing...')
-            my_hexapod.back_leg_dancing(step=1)
-
-        print('cleaning up from dancing...')
-        my_hexapod.reposition_center_legs(100)
-
+        print('back dancing...')
+        my_hexapod.back_leg_dancing(step=1, iteration=iteration)
         return ('Dancing Back Legs {} times'.format(iteration))
 
     elif command == 'back_dancing_2':
-        print('getting ready to dance...')
-        my_hexapod.reposition_center_legs(100)
-        my_hexapod.move_center_legs(raise_value=100)
-
-        print('ready to dance...')
-        for i in range(iteration):
-            print('front dancing...')
-            my_hexapod.back_leg_dancing(step=2)
-
-        print('cleaning up from dancing...')
-        my_hexapod.reposition_center_legs(100)
-
+        print('back dancing...')
+        my_hexapod.back_leg_dancing(step=2, iteration=iteration)
         return ('Dancing Back Legs {} times'.format(iteration))
 
     elif command == 'commands':
