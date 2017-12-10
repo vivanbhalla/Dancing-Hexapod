@@ -582,9 +582,9 @@ class Hexapod_12DOF(Hexapod):
         time.sleep(time_step)
 
         # Lower 3 legs
-        self.servos['right_front_raise'].set_position(90)
-        self.servos['left_center_raise'].set_position(90)
-        self.servos['right_back_raise'].set_position(90)
+        self.servos['right_front_raise'].set_position(70)
+        self.servos['left_center_raise'].set_position(70)
+        self.servos['right_back_raise'].set_position(70)
         
         self.servos['left_front_raise'].move_up()
         self.servos['right_center_raise'].move_up()
@@ -633,9 +633,9 @@ class Hexapod_12DOF(Hexapod):
         time.sleep(time_step)
 
         # Lower 3 legs
-        self.servos['left_front_raise'].set_position(90)
-        self.servos['right_center_raise'].set_position(90)
-        self.servos['left_back_raise'].set_position(90)
+        self.servos['left_front_raise'].set_position(70)
+        self.servos['right_center_raise'].set_position(70)
+        self.servos['left_back_raise'].set_position(70)
         
         self.servos['right_front_raise'].move_up()
         self.servos['left_center_raise'].move_up()
@@ -658,6 +658,94 @@ class Hexapod_12DOF(Hexapod):
         self.servos['left_center_raise'].move_center()
         self.servos['right_back_raise'].move_center()
     
+    def left_right_left_step_back(self, time_step=0.2):
+        # Prep for a step (left-right-left step)
+        self.servos['right_front_raise'].move_center()
+        self.servos['right_center_raise'].move_center()
+        self.servos['right_back_raise'].move_center()
+        self.servos['left_front_raise'].move_center()
+        self.servos['left_center_raise'].move_center()
+        self.servos['left_back_raise'].move_center()
+
+        time.sleep(time_step)
+
+        # Lower 3 legs
+        self.servos['left_front_raise'].set_position(70)
+        self.servos['right_center_raise'].set_position(70)
+        self.servos['left_back_raise'].set_position(70)
+
+        time.sleep(time_step)
+
+        # Rotate 3 legs back
+        self.servos['left_front_rotate'].move_forward()
+        self.servos['right_center_rotate'].move_forward()
+        self.servos['left_back_rotate'].move_forward()
+
+        time.sleep(time_step)
+
+        # Raise 3 legs
+        self.servos['left_front_raise'].move_up()
+        self.servos['right_center_raise'].move_up()
+        self.servos['left_back_raise'].move_up()
+
+        time.sleep(time_step)
+
+        # Rotate 3 legs back
+        self.servos['left_front_rotate'].move_back()
+        self.servos['right_center_rotate'].move_back()
+        self.servos['left_back_rotate'].move_back()
+
+        time.sleep(time_step)
+
+        # Center 3 legs
+        self.servos['left_front_raise'].move_center()
+        self.servos['right_center_raise'].move_center()
+        self.servos['left_back_raise'].move_center()
+
+    def right_left_right_step_back(self, time_step=0.2):
+        # Prep for a step (left-right-left step)
+        self.servos['right_front_raise'].move_center()
+        self.servos['right_center_raise'].move_center()
+        self.servos['right_back_raise'].move_center()
+        self.servos['left_front_raise'].move_center()
+        self.servos['left_center_raise'].move_center()
+        self.servos['left_back_raise'].move_center()
+
+        time.sleep(time_step)
+
+        # Lower 3 legs
+        self.servos['right_front_raise'].set_position(70)
+        self.servos['left_center_raise'].set_position(70)
+        self.servos['right_back_raise'].set_position(70)
+
+        time.sleep(time_step)
+
+        # Rotate 3 legs back
+        self.servos['right_front_rotate'].move_forward()
+        self.servos['left_center_rotate'].move_forward()
+        self.servos['right_back_rotate'].move_forward()
+
+        time.sleep(time_step)
+
+        # Raise 3 legs
+        self.servos['right_front_raise'].move_up()
+        self.servos['left_center_raise'].move_up()
+        self.servos['right_back_raise'].move_up()
+
+        time.sleep(time_step)
+
+        # Rotate 3 legs back
+        self.servos['right_front_rotate'].move_back()
+        self.servos['left_center_rotate'].move_back()
+        self.servos['right_back_rotate'].move_back()
+
+        time.sleep(time_step)
+
+        # Center 3 legs
+        self.servos['right_front_raise'].move_center()
+        self.servos['left_center_raise'].move_center()
+        self.servos['right_back_raise'].move_center()
+        
     def turn_left(self, time_step=0.2):
         # Raise right front/back legs
         self.servos['right_front_raise'].move_up()
