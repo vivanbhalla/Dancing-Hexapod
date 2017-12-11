@@ -1,0 +1,9 @@
+walk 6
+walk_back 6
+turn_left 4
+turn_right 4
+front_dancing_1 4
+front_dancing_2 4
+back_dancing_1 4
+back_dancing_2 4
+sit
