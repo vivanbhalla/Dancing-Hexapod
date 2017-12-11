@@ -206,47 +206,46 @@ class Hexapod:
     def sit(self):
         self.resting_state()
 
-    def rotate(self, right=True):
-        sleep_time = 0.5
+    def rotate(self, left=False, timestep=0.3, back=None):
         # Raise the center legs
         self.move_center_lowers(15)
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # position center legs for rotation
-        if right:
+        if not left:
             self.servos['left_center_rotate'].move_forward()
             self.servos['right_center_rotate'].move_back()
         else:
             self.servos['left_center_rotate'].move_back()
             self.servos['right_center_rotate'].move_forward()
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # Drop center legs to control rotation
         self.move_center_lowers(30)
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # position center legs for rotation
-        if right:
+        if not left:
             self.servos['left_center_rotate'].move_back()
             self.servos['right_center_rotate'].move_forward()
         else:
             self.servos['left_center_rotate'].move_forward()
             self.servos['right_center_rotate'].move_back()
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # raise the middle legs to re-center
         self.move_center_lowers(15)
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # center the middle legs
         self.move_center_rotators(50)
 
-        time.sleep(sleep_time)
+        time.sleep(timestep)
 
         # reset the center legs to prep for next movement
         self.move_center_lowers(25)        
@@ -830,71 +829,111 @@ class Hexapod_12DOF(Hexapod):
         self.servos['left_center_raise'].move_center()
         self.servos['left_back_raise'].move_center()
 
-    def move_all_legs(self, rotate_value=None, raise_value=None):
+    def row(self, timestep=0.3, back=False):
+        self.move_all_legs(rotate_value=100, raise_value=50)
+        time.sleep(timestep)
+
+        if back:
+            self.move_center_legs(raise_value=70)
+            time.sleep(timestep)
+
+            self.move_center_legs(rotate_value=0)
+            time.sleep(timestep)
+
+            self.move_center_legs(raise_value=0)
+            time.sleep(timestep)
+        else:
+            self.move_center_legs(raise_value=0)
+            time.sleep(timestep)
+
+            self.move_center_legs(rotate_value=0)
+            time.sleep(timestep)
+
+            self.move_center_legs(raise_value=70)
+            time.sleep(timestep)
+
+        self.move_center_legs(rotate_value=100)
+        time.sleep(timestep)
+
+        self.move_center_legs(raise_value=50)
+        time.sleep(timestep)        
+        
+    def rotate(self, timestep=0.3, left=False, back=False):
+        self.move_all_legs(rotate_value=100, raise_value=50)
+        time.sleep(timestep)
+
+        if back:
+            self.move_center_legs(raise_value=70)
+            time.sleep(timestep)
+            time.sleep(timestep)
+
+            if left:
+                self.move_leg('left_center', rotate_value=0)
+            else:
+                self.move_leg('right_center', rotate_value=0)
+
+            time.sleep(timestep)
+
+            self.move_center_legs(raise_value=0)
+            time.sleep(timestep)        
+        else:
+            self.move_center_legs(raise_value=0)
+            time.sleep(timestep)
+
+            if left:
+                self.move_leg('right_center', rotate_value=0)
+            else:
+                self.move_leg('left_center', rotate_value=0)
+
+            time.sleep(timestep)
+
+            self.move_center_legs(raise_value=70)
+            time.sleep(timestep)
+            time.sleep(timestep)
+
+
+        self.move_center_legs(rotate_value=100)
+        time.sleep(timestep)
+
+        self.move_center_legs(raise_value=50)
+        time.sleep(timestep)
+        
+    def move_leg(self, name, rotate_value=None, raise_value=None):
         if rotate_value is not None:
-            self.servos['right_front_rotate'].set_position(rotate_value)
-            self.servos['right_center_rotate'].set_position(rotate_value)
-            self.servos['right_back_rotate'].set_position(rotate_value)
-            self.servos['left_front_rotate'].set_position(rotate_value)
-            self.servos['left_center_rotate'].set_position(rotate_value)
-            self.servos['left_back_rotate'].set_position(rotate_value)
-            
+            self.servos[name + '_rotate'].set_position(rotate_value)
+
         if raise_value is not None:
-            self.servos['right_front_raise'].set_position(raise_value)
-            self.servos['right_center_raise'].set_position(raise_value)
-            self.servos['right_back_raise'].set_position(raise_value)
-            self.servos['left_front_raise'].set_position(raise_value)
-            self.servos['left_center_raise'].set_position(raise_value)
-            self.servos['left_back_raise'].set_position(raise_value)
+            self.servos[name + '_raise'].set_position(raise_value)
+            
+    def move_all_legs(self, rotate_value=None, raise_value=None):
+        self.move_leg('right_front', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('right_center', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('right_back', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_front', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_center', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_back', rotate_value=rotate_value, raise_value=raise_value)
             
     def move_right_legs(self, rotate_value=None, raise_value=None):
-        if rotate_value is not None:
-            self.servos['right_front_rotate'].set_position(rotate_value)
-            self.servos['right_center_rotate'].set_position(rotate_value)
-            self.servos['right_back_rotate'].set_position(rotate_value)
-            
-        if raise_value is not None:
-            self.servos['right_front_raise'].set_position(raise_value)
-            self.servos['right_center_raise'].set_position(raise_value)
-            self.servos['right_back_raise'].set_position(raise_value)
+        self.move_leg('right_front', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('right_center', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('right_back', rotate_value=rotate_value, raise_value=raise_value)
 
     def move_left_legs(self, rotate_value=None, raise_value=None):
-        if rotate_value is not None:
-            self.servos['left_front_rotate'].set_position(rotate_value)
-            self.servos['left_center_rotate'].set_position(rotate_value)
-            self.servos['left_back_rotate'].set_position(rotate_value)
-            
-        if raise_value is not None:
-            self.servos['left_front_raise'].set_position(raise_value)
-            self.servos['left_center_raise'].set_position(raise_value)
-            self.servos['left_back_raise'].set_position(raise_value)            
+        self.move_leg('left_front', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_center', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_back', rotate_value=rotate_value, raise_value=raise_value)            
             
     def move_front_legs(self, rotate_value=None, raise_value=None):
-        if rotate_value is not None:
-            self.servos['left_front_rotate'].set_position(rotate_value)
-            self.servos['right_front_rotate'].set_position(rotate_value)
-            
-        if raise_value is not None:
-            self.servos['left_front_raise'].set_position(raise_value)
-            self.servos['right_front_raise'].set_position(raise_value)
-    
+        self.move_leg('right_front', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_front', rotate_value=rotate_value, raise_value=raise_value)
+                    
     def move_center_legs(self, rotate_value=None, raise_value=None):
-        if rotate_value is not None:
-            self.servos['left_center_rotate'].set_position(rotate_value)
-            self.servos['right_center_rotate'].set_position(rotate_value)
-            
-        if raise_value is not None:
-            self.servos['left_center_raise'].set_position(raise_value)
-            self.servos['right_center_raise'].set_position(raise_value)
+        self.move_leg('right_center', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_center', rotate_value=rotate_value, raise_value=raise_value)
             
     def move_back_legs(self, rotate_value=None, raise_value=None):
-        if rotate_value is not None:
-            self.servos['left_back_rotate'].set_position(rotate_value)
-            self.servos['right_back_rotate'].set_position(rotate_value)
-            
-        if raise_value is not None:
-            self.servos['left_back_raise'].set_position(raise_value)
-            self.servos['right_back_raise'].set_position(raise_value)
+        self.move_leg('right_back', rotate_value=rotate_value, raise_value=raise_value)
+        self.move_leg('left_back', rotate_value=rotate_value, raise_value=raise_value) 
             
     def reposition_front_legs(self, position, time_step=0.5):
         # Raise Legs and wiggle

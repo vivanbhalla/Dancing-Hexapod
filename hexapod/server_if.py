@@ -79,7 +79,9 @@ def command_processor(data, my_hexapod):
         'stand',
         'center',
         'spread',
-        'align'
+        'align',
+        'rotate_left',
+        'rotate_right',
     ]
 
     if command == 'turn_left':
@@ -95,7 +97,27 @@ def command_processor(data, my_hexapod):
             my_hexapod.turn_right()
 
         return ('Turning Right {} times'.format(iteration))
-    
+
+    elif command == 'rotate_left':
+        for i in range(iteration):
+            print('rotating left...')
+            if i%2:
+                my_hexapod.rotate(left=True, back=False)
+            else:
+                my_hexapod.rotate(left=True, back=True)
+
+        return ('Rotating Left {} times'.format(iteration))
+
+    elif command == 'rotate_right':
+        for i in range(iteration):
+            print('rotating_right...')
+            if i%2:
+                my_hexapod.rotate(left=False, back=False)
+            else:
+                my_hexapod.rotate(left=False, back=True)
+
+        return ('Rotating Right {} times'.format(iteration))
+
     elif command == 'walk_forward' or command == 'walk':
         for i in range(iteration):
             print('walking forward...')
