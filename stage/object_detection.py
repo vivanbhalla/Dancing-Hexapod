@@ -8,19 +8,34 @@ import numpy as np
 import cv2
 
 ## HSV constants for robot and spotlight
-H_robot=179
+# For yellow 12DOF hexapod
+H_robot=29
 S_robot=255
-V_robot=42
+V_robot=255
+
+H_robot_low=19
+S_robot_low=0
+V_robot_low=0
+
+# For black 18DOF hexapod
+# H_robot=179
+# S_robot=255
+# V_robot=42
+# H_robot_low=0
+# S_robot_low=0
+# V_robot_low=0
+
 H_spotlight=179
 S_spotlight=255
 V_spotlight=243
-H_low=0
-S_low=0
-V_low=0
+
+H_spotlight_low=0
+S_spotlight_low=0
+V_spotlight_low=0
 
 
 ## Create a video capture object
-cap = cv2.VideoCapture(1) # Send 0 since we have only one camera. Send 1 to use second camera
+cap = cv2.VideoCapture(0) # Send 0 since we have only one camera. Send 1 to use second camera
 
 ## Check whether capture object is opened or not
 if(cap.isOpened() == False):
@@ -28,7 +43,10 @@ if(cap.isOpened() == False):
     cap.open()
 
 # Create a window
-cv2.namedWindow('image')
+# cv2.namedWindow('image')
+
+# counter to limit display output
+count = 0
 
 ## Start capturing frame by frame in an infinite loop
 while(True): 
@@ -42,8 +60,9 @@ while(True):
     # Create numpy arrays of these boundaries
     # TODO: hardcode the values below from what is found through experiment
     higher_boundary_robot = np.array([H_robot,S_robot,V_robot])
+    lower_boundary_robot = np.array([H_robot_low,S_robot_low,V_robot_low])
     higher_boundary_spotlight = np.array([H_spotlight,S_spotlight,V_spotlight])
-    lower_boundary = np.array([H_low,S_low,V_low])
+    lower_boundary_spotlight = np.array([H_spotlight_low,S_spotlight_low,V_spotlight_low])
 
     ############################ TODO ######################################
 
@@ -51,33 +70,29 @@ while(True):
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV) 
 
     # Threshold the HSV image to get only our object
-    threshold_robot = cv2.inRange(hsv,lower_boundary,higher_boundary_robot)
-    threshold_spotlight = cv2.inRange(hsv,lower_boundary,higher_boundary_spotlight)
+    threshold_robot = cv2.inRange(hsv,lower_boundary_robot,higher_boundary_robot)
+    threshold_spotlight = cv2.inRange(hsv,lower_boundary_spotlight,higher_boundary_spotlight)
 
-    # Get the targeted image by doing bitwise and
-    target_robot = cv2.bitwise_and(frame,frame,mask=threshold_robot)
-    target_spotlight = cv2.bitwise_and(frame,frame,mask=threshold_spotlight)
+    # invert the target_spotlight mask (spotlight is in black with white background, not white with black background...
+    threshold_spotlight = cv2.bitwise_not(threshold_spotlight)
 
     ## Perform morphological transformations #####
     ## Morphological opening
     # We first remove the white noise from the boundaries of the detected object - Erode operation
     # We create an elliptical kernel for the erosion
-    target_robot = cv2.erode(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-    target_spotlight = cv2.erode(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_robot = cv2.erode(threshold_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_spotlight = cv2.erode(threshold_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
     # Perform the dilation to get the more enchanced image of the object
-    target_robot = cv2.dilate(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-    target_spotlight = cv2.dilate(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_robot = cv2.dilate(threshold_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_spotlight = cv2.dilate(threshold_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
     ## Morphological Closing - This is done to fill holes insie the detected object. 
     ## This is done by first dilation then eroding the image
-
-    target_robot = cv2.dilate(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-    target_robot = cv2.erode(target_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-    target_spotlight = cv2.dilate(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-    target_spotlight = cv2.erode(target_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
-
-    
+    threshold_robot = cv2.dilate(threshold_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_robot = cv2.erode(threshold_robot,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_spotlight = cv2.dilate(threshold_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
+    threshold_spotlight = cv2.erode(threshold_spotlight,cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)))
 
     ######################## Object Tracking #########################################################
     # We use the moments method to track the object
@@ -103,16 +118,22 @@ while(True):
         X_s=moments_spotlight["m10"] / area_spotlight
         Y_s=moments_spotlight["m01"] / area_spotlight
 
-    print("X for S is"+str(X_s))
-    print("Y for S is"+str(Y_s))
-    print("X for R is"+str(X_r))
-    print("Y for R is"+str(Y_r))
+    if count > 100:
+        if X_r and Y_r:
+            print("Hexapod: {}, {}".format(X_r, Y_r))
+        if X_s and Y_s:
+            print("Spotlight: {}, {}".format(X_s, Y_s))
+        print()
+        count = 0
+    count += 1
+
+    # Add dots to represent the location of the robot and spotlight on initial image
+    cv2.circle(frame, (int(X_r), int(Y_r)), 5, (0,0,255), -1) 
+    cv2.circle(frame, (int(X_s), int(Y_s)), 5, (255,0,0), -1)
 
     ## Display the images
-    cv2.imshow("Result_robot",target_robot)
-    cv2.imshow("Mask_robot",threshold_robot)
-    cv2.imshow("Result_spotlight",target_spotlight)
-    cv2.imshow("Mask_spotlight",threshold_spotlight)
+    # cv2.imshow("Mask_robot",threshold_robot)
+    # cv2.imshow("Mask_spotlight",threshold_spotlight)
     cv2.imshow("Original Image",frame)
     k = cv2.waitKey(5) & 0xFF
     if k == 27:
