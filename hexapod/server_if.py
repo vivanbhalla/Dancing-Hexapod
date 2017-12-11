@@ -3,7 +3,7 @@ import socket
 import time
 import yaml
 
-from hexapod import Hexapod_12DOF
+from hexapod import Hexapod_12DOF, Hexapod_18DOF
  
 def get_args():
     parser = argparse.ArgumentParser(description='hexapod server.')
@@ -38,7 +38,7 @@ def initialize_hexapod(config_file):
         my_hexapod = Hexapod_12DOF(my_config)
         my_hexapod.initial_tests()
         
-    elif config_file = 'config_18DOF.yaml':
+    elif config_file == 'config_18DOF.yaml':
         my_hexapod = Hexapod_18DOF(my_config)
         my_hexapod.initial_tests()
         
@@ -69,12 +69,17 @@ def command_processor(data, my_hexapod):
     commands = [
         'turn_left',
         'turn_right',
-        'walk_forward',
-        'walk_backward',
+        'walk_forward|walk',
+        'walk_backward|walk_back',
         'front_dancing_1',
         'front_dancing_2',
         'back_dancing_1',
         'back_dancing_2',
+        'sit',
+        'stand',
+        'center',
+        'spread',
+        'align'
     ]
 
     if command == 'turn_left':
@@ -91,7 +96,7 @@ def command_processor(data, my_hexapod):
 
         return ('Turning Right {} times'.format(iteration))
     
-    elif command == 'walk_forward':
+    elif command == 'walk_forward' or command == 'walk':
         for i in range(iteration):
             print('walking forward...')
             if i%2:
@@ -101,7 +106,7 @@ def command_processor(data, my_hexapod):
 
         return ('Walking Forward {} times'.format(iteration))
 
-    elif command == 'walk_backward':
+    elif command == 'walk_backward' or command == 'walk_back':
         for i in range(iteration):
             print('walking backward...')
             if i%2:
@@ -130,6 +135,31 @@ def command_processor(data, my_hexapod):
         print('back dancing...')
         my_hexapod.back_leg_dancing(step=2, iteration=iteration)
         return ('Dancing Back Legs {} times'.format(iteration))
+
+    elif command == 'sit':
+        print('sitting...')
+        my_hexapod.sit()
+        return ('Sitting')
+
+    elif command == 'stand':
+        print('standing...')
+        my_hexapod.stand()
+        return ('Standing')
+
+    elif command == 'center':
+        print('centering legs...')
+        my_hexapod.center_all_legs()
+        return ('Centering All Legs')
+
+    elif command == 'align':
+        print('aligning legs...')
+        my_hexapod.align_all_legs()
+        return ('Aligning All Legs')
+
+    elif command == 'spread':
+        print('spreading legs...')
+        my_hexapod.spread_all_legs()
+        return ('Spreading All Legs')
 
     elif command == 'commands':
         temp = 'Implemented Commands: '

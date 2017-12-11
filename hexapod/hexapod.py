@@ -532,13 +532,28 @@ class Hexapod_12DOF(Hexapod):
     def __init__(self, config):
         super().__init__(config)
         
-    def initial_tests(timestep=1):
+    def initial_tests(self, timestep=1):
         self.move_all_legs(raise_value=0, rotate_value=100)
         time.sleep(timestep)
         self.move_all_legs(raise_value=100, rotate_value=100)
         time.sleep(timestep)
         self.move_all_legs(raise_value=0, rotate_value=100)
-        
+    
+    def sit(self):
+        self.lower_height()
+
+    def stand(self):
+        self.center_height()
+
+    def center_all_legs(self):
+        pass
+
+    def align_all_legs(self):
+        pass
+
+    def spread_all_legs(self):
+        pass
+
     def lower_height(self):
         self.servos['right_front_raise'].set_position(0)
         self.servos['right_center_raise'].set_position(0)
@@ -962,6 +977,7 @@ class Hexapod_12DOF(Hexapod):
         self.servos['right_front_raise'].move_up()
 
         time.sleep(time_step)
+
         for i in range(iteration):
             if step == 1:
                 self.side_to_side_wave(time_step)
@@ -1025,7 +1041,7 @@ class Hexapod_18DOF(Hexapod):
     def __init__(self, config):
         super().__init__(config)   
         
-    def initial_tests(iteration=1, timestep=1):
+    def initial_tests(self, iteration=1, timestep=1):
         # Setup initial state
         self.align_all_legs()
         self.resting_state()
@@ -1212,6 +1228,12 @@ class Hexapod_18DOF(Hexapod):
 
         time.sleep(timestep)
 
+        # self.servos['left_front_lower'].set_position(raise_height)
+        # self.servos['right_center_lower'].set_position(raise_height)
+        # self.servos['left_back_lower'].set_position(raise_height)
+
+        # time.sleep(timestep)
+
         # Rotate 3 legs forward
         if backward:
             self.servos['right_front_rotate'].set_position(50)
@@ -1274,6 +1296,12 @@ class Hexapod_18DOF(Hexapod):
 
         time.sleep(timestep)
 
+        # self.servos['right_front_lower'].set_position(raise_height)
+        # self.servos['left_center_lower'].set_position(raise_height)
+        # self.servos['right_back_lower'].set_position(raise_height)
+
+        # time.sleep(timestep)
+
         # Rotate 3 legs forward
         if backward:
             self.servos['left_front_rotate'].set_position(50)
@@ -1327,13 +1355,13 @@ class Hexapod_18DOF(Hexapod):
                 self.move_leg('left_front', rotate_value=0)
                 self.move_leg('right_front', rotate_value=0)
 
-                time.sleep(iteration)
+                time.sleep(timestep)
 
                 # Move front legs to the back
                 self.move_leg('left_front', rotate_value=80)
                 self.move_leg('right_front', rotate_value=80)
 
-                time.sleep(iteration)
+                time.sleep(timestep)
         else:
             pass # unsupported movement
 
